@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import type { User } from '../types';
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export function useAuth() {
     const user = ref<User | null>(null);
@@ -10,7 +11,7 @@ export function useAuth() {
 
     const login = async (email: string, password: string) => {
         try {
-            const response = await axios.post('http://localhost:8000/api/login', { email, password });
+            const response = await axios.post(`${apiUrl}/api/login`, { email, password });
             localStorage.setItem('token', response.data.token);
             user.value = response.data.user;
             isAuthenticated.value = true;
@@ -22,7 +23,7 @@ export function useAuth() {
 
     const register = async (username: string, email: string, password: string) => {
         try {
-            const response = await axios.post('http://localhost:8000/api/register', { username, email, password });
+            const response = await axios.post(`${apiUrl}/api/register`, { username, email, password });
             localStorage.setItem('token', response.data.token);
             user.value = response.data.user;
             isAuthenticated.value = true;
@@ -34,7 +35,7 @@ export function useAuth() {
 
     const logout = async () => {
         try {
-            await axios.post('http://localhost:8000/api/logout', {}, {
+            await axios.post(`${apiUrl}/api/logout`, {}, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             localStorage.removeItem('token');
@@ -51,7 +52,7 @@ export function useAuth() {
         const token = localStorage.getItem('token');
         if (token) {
             try {
-                const response = await axios.get('http://localhost:8000/api/user', {
+                const response = await axios.get(`${apiUrl}/api/user`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 user.value = response.data;

@@ -31,6 +31,8 @@ import { useAuth } from '../composables/useAuth';
 import { usePosts } from '../composables/usePosts';
 import type { Post } from '../types';
 
+
+
 export default defineComponent({
     props: {
         post: {
