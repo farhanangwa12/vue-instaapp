@@ -8,8 +8,8 @@
                     <button @click="logout" class="logout-button">Logout</button>
                 </div>
                 <div v-else class="auth-links">
-                    <RouterLink to="/login">Login</RouterLink>
-                    <RouterLink to="/register">Register</RouterLink>
+                    <!-- <RouterLink to="/login">Login</RouterLink>
+                    <RouterLink to="/register">Register</RouterLink> -->
                 </div>
             </div>
         </nav>
@@ -26,7 +26,7 @@ import { useAuth } from './composables/useAuth';
 export default defineComponent({
     setup() {
         const { user, isAuthenticated, logout, fetchUser } = useAuth();
-
+        console.log(user);
         onMounted(() => {
             fetchUser();
         });
