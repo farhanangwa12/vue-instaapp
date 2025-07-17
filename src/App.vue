@@ -26,7 +26,6 @@ import { useAuth } from './composables/useAuth';
 export default defineComponent({
     setup() {
         const { user, isAuthenticated, logout, fetchUser } = useAuth();
-        console.log(user);
         onMounted(() => {
             fetchUser();
         });

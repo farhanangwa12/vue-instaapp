@@ -13,7 +13,6 @@ export function usePosts() {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             posts.value = response.data;
-            // throw new Error('Gagal!');
         } catch {
             throw new Error('Failed to fetch posts');
         }
