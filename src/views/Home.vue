@@ -14,3 +14,10 @@ export default defineComponent({
     components: { PostForm, PostList },
 });
 </script>
+<style scoped>
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; 
+}
+</style>
