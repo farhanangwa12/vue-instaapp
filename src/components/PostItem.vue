@@ -1,27 +1,27 @@
 <template>
-    <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex items-center mb-3">
-            <span class="font-bold text-gray-800">{{ post.user.username }}</span>
-            <span class="text-gray-500 text-sm ml-2">{{ new Date(post.created_at).toLocaleString() }}</span>
+    <div class="post-card">
+        <div class="post-header">
+            <span class="username">{{ post.user.username }}</span>
+            <span class="timestamp">{{ new Date(post.created_at).toLocaleString() }}</span>
         </div>
-        <p class="mb-3 text-gray-700">{{ post.content }}</p>
-        <img v-if="post.image" :src="'http://localhost:8000/storage/' + post.image" class="w-full rounded-md mb-3" alt="Post image" />
-        <div class="flex items-center mb-3">
-            <button @click="handleToggleLike" class="text-blue-500 hover:text-blue-700 mr-4">
+        <p class="post-content">{{ post.content }}</p>
+        <img v-if="post.image" :src="'http://localhost:8000/storage/' + post.image" alt="Post image" class="post-image" />
+        <div class="post-actions">
+            <button @click="handleToggleLike" class="like-button">
                 {{ post.likes.some(like => like.user_id === user?.id) ? 'Unlike' : 'Like' }} ({{ post.likes.length }})
             </button>
         </div>
-        <div class="border-t pt-3">
-            <div v-for="comment in post.comments" :key="comment.id" class="flex justify-between mb-2">
+        <div class="comments-section">
+            <div v-for="comment in post.comments" :key="comment.id" class="comment">
                 <span><strong>{{ comment.user.username }}</strong>: {{ comment.content }}</span>
-                <button v-if="comment.user_id === user?.id" @click="handleDeleteComment(comment.id)" class="text-red-500 hover:text-red-700">Delete</button>
+                <button v-if="comment.user_id === user?.id" @click="handleDeleteComment(comment.id)" class="delete-comment-button">Delete</button>
             </div>
-            <form @submit.prevent="handleAddComment" class="mt-3">
-                <input v-model="newComment" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Add a comment..." required />
-                <button type="submit" class="bg-blue-500 text-white p-2 rounded-md mt-2 hover:bg-blue-600">Comment</button>
+            <form @submit.prevent="handleAddComment" class="add-comment-form">
+                <input v-model="newComment" placeholder="Add a comment..." required />
+                <button type="submit">Comment</button>
             </form>
         </div>
-        <button v-if="post.user_id === user?.id" @click="handleDeletePost" class="text-red-500 hover:text-red-700 mt-3">Delete Post</button>
+        <button v-if="post.user_id === user?.id" @click="handleDeletePost" class="delete-post-button">Delete Post</button>
     </div>
 </template>
 
@@ -30,8 +30,6 @@ import { defineComponent, ref } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { usePosts } from '../composables/usePosts';
 import type { Post } from '../types';
-
-
 
 export default defineComponent({
     props: {
@@ -82,3 +80,122 @@ export default defineComponent({
     },
 });
 </script>
+
+<style scoped>
+.post-card {
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.username {
+    font-weight: bold;
+    color: #1f2937;
+}
+
+.timestamp {
+    font-size: 12px;
+    color: #6b7280;
+    margin-left: 8px;
+}
+
+.post-content {
+    margin-bottom: 12px;
+    color: #374151;
+}
+
+.post-image {
+    width: 100%;
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+
+.post-actions {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.like-button {
+    color: #3b82f6;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.like-button:hover {
+    color: #1d4ed8;
+}
+
+.comments-section {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 12px;
+}
+
+.comment {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.delete-comment-button {
+    color: #ef4444;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.delete-comment-button:hover {
+    color: #b91c1c;
+}
+
+.add-comment-form {
+    margin-top: 12px;
+}
+
+.add-comment-form input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+}
+
+.add-comment-form input:focus {
+    border-color: #3b82f6;
+    outline: none;
+}
+
+.add-comment-form button {
+    margin-top: 8px;
+    background: #3b82f6;
+    color: white;
+    padding: 8px;
+    width: 100%;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.add-comment-form button:hover {
+    background: #2563eb;
+}
+
+.delete-post-button {
+    margin-top: 12px;
+    color: #ef4444;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.delete-post-button:hover {
+    color: #b91c1c;
+}
+</style>

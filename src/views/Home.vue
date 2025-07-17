@@ -1,5 +1,5 @@
 <template>
-    <div class="space-y-6">
+    <div class="container">
         <PostForm />
         <PostList />
     </div>
@@ -14,10 +14,11 @@ export default defineComponent({
     components: { PostForm, PostList },
 });
 </script>
+
 <style scoped>
 .container {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem; 
+    gap: 1.5rem; /* setara dengan Tailwind space-y-6 */
 }
 </style>

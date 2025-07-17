@@ -1,24 +1,26 @@
 <template>
-    <div class="flex items-center justify-center min-h-screen bg-gray-100">
-        <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Register</h2>
+    <div class="register-page">
+        <div class="register-box">
+            <h2>Register</h2>
             <form @submit.prevent="handleRegister">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">Username</label>
-                    <input v-model="username" type="text" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                <div class="form-group">
+                    <label>Username</label>
+                    <input v-model="username" type="text" required />
                 </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">Email</label>
-                    <input v-model="email" type="email" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                <div class="form-group">
+                    <label>Email</label>
+                    <input v-model="email" type="email" required />
                 </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">Password</label>
-                    <input v-model="password" type="password" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                <div class="form-group">
+                    <label>Password</label>
+                    <input v-model="password" type="password" required />
                 </div>
-                <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">Register</button>
-                <p v-if="error" class="text-red-500 text-sm mt-2">{{ error }}</p>
+                <button type="submit">Register</button>
+                <p v-if="error" class="error">{{ error }}</p>
             </form>
-            <p class="mt-4 text-center">Already have an account? <router-link to="/login" class="text-blue-500 hover:underline">Login</router-link></p>
+            <p class="login-link">
+                Already have an account? <router-link to="/login">Login</router-link>
+            </p>
         </div>
     </div>
 </template>
@@ -48,3 +50,88 @@ export default defineComponent({
     },
 });
 </script>
+
+<style scoped>
+.register-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #f3f4f6;
+}
+
+.register-box {
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.register-box h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 24px;
+    text-align: center;
+    color: #1f2937;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: #374151;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    outline: none;
+}
+
+.form-group input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #2563eb;
+}
+
+.error {
+    color: #ef4444;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.login-link {
+    margin-top: 16px;
+    text-align: center;
+}
+
+.login-link a {
+    color: #3b82f6;
+    text-decoration: none;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+</style>
