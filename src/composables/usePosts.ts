@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import axios from 'axios';
 import type { Post } from '../types';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const apiUrl = import.meta.env.BASE_URL || 'http://localhost:8000';
 
 export function usePosts() {
     const posts = ref<Post[]>([]);

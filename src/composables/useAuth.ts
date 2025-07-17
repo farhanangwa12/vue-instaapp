@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import type { User } from '../types';
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const apiUrl = import.meta.env.BASE_URL || 'http://localhost:8000';
 
 export function useAuth() {
     const user = ref<User | null>(null);
