@@ -4,7 +4,7 @@
             <div class="nav-content">
                 <h1 class="app-title">InstaApp</h1>
                 <div v-if="isAuthenticated" class="auth-info">
-                    <span>Welcome, {{ user?.username }}</span>
+                    <span>Welcome, {{ user?.name }}</span>
                     <button @click="logout" class="logout-button">Logout</button>
                 </div>
                 <div v-else class="auth-links">
@@ -20,17 +20,24 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import { useAuth } from './composables/useAuth';
-
 export default defineComponent({
     setup() {
         const { user, isAuthenticated, logout, fetchUser } = useAuth();
-        onMounted(() => {
+        const userData = ref<any>(null);
+
+        onMounted(async () => {
             fetchUser();
+
+            // Ambil dari localStorage
+            const storedUser = localStorage.getItem('user');
+            userData.value = storedUser ? JSON.parse(storedUser) : null;
+            console.log('test:', userData.value);
         });
 
-        return { user, isAuthenticated, logout };
+
+        return { user, isAuthenticated, logout, userData };
     },
 });
 </script>

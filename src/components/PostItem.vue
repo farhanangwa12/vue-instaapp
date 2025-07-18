@@ -5,23 +5,26 @@
             <span class="timestamp">{{ new Date(post.created_at).toLocaleString() }}</span>
         </div>
         <p class="post-content">{{ post.content }}</p>
-        <img v-if="post.image" :src="'http://localhost:8000/storage/' + post.image" alt="Post image" class="post-image" />
+        <img v-if="post.image" :src="'http://localhost:8000/storage/' + post.image" alt="Post image"
+            class="post-image" />
         <div class="post-actions">
             <button @click="handleToggleLike" class="like-button">
-                {{ post.likes.some(like => like.user_id === user?.id) ? 'Unlike' : 'Like' }} ({{ post.likes.length }})
+                {{post.likes.some(like => like.user_id === user?.id) ? 'Unlike' : 'Like'}} ({{ post.likes.length }})
             </button>
         </div>
         <div class="comments-section">
             <div v-for="comment in post.comments" :key="comment.id" class="comment">
-                <span><strong>{{ comment.user.username }}</strong>: {{ comment.content }}</span>
-                <button v-if="comment.user_id === user?.id" @click="handleDeleteComment(comment.id)" class="delete-comment-button">Delete</button>
+                <span><strong>{{ comment.user.name }}</strong>: {{ comment.content }}</span>
+                <button v-if="comment.user_id === user?.id" @click="handleDeleteComment(comment.id)"
+                    class="delete-comment-button">Delete</button>
             </div>
             <form @submit.prevent="handleAddComment" class="add-comment-form">
                 <input v-model="newComment" placeholder="Add a comment..." required />
                 <button type="submit">Comment</button>
             </form>
         </div>
-        <button v-if="post.user_id === user?.id" @click="handleDeletePost" class="delete-post-button">Delete Post</button>
+        <button v-if="post.user_id === user?.id" @click="handleDeletePost" class="delete-post-button">Delete
+            Post</button>
     </div>
 </template>
 
@@ -39,9 +42,25 @@ export default defineComponent({
         },
     },
     setup(props) {
-        const { user } = useAuth();
+        const { user, fetchUser } = useAuth();
         const { toggleLike, addComment, deleteComment, deletePost } = usePosts();
         const newComment = ref('');
+
+
+        // Ambil user dari localStorage saat setup
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            try {
+                user.value = JSON.parse(storedUser);
+            } catch (e) {
+                console.error('Failed to parse user from storage');
+            }
+        } else {
+            // Optional: fetch dari server kalau localStorage kosong
+            fetchUser();
+        }
+
+
 
         const handleToggleLike = async () => {
             try {

@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import axios from 'axios';
 import type { Post } from '../types';
 
-const apiUrl = import.meta.env.BASE_URL || 'http://localhost:8000';
+const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:8000';
 
 export function usePosts() {
     const posts = ref<Post[]>([]);
@@ -31,6 +31,7 @@ export function usePosts() {
                 },
             });
             posts.value.unshift(response.data);
+            await fetchPosts();
         } catch {
             throw new Error('Failed to create post');
         }
@@ -42,6 +43,7 @@ export function usePosts() {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             posts.value = posts.value.filter(post => post.id !== postId);
+            await fetchPosts();
         } catch {
             throw new Error('Failed to delete post');
         }

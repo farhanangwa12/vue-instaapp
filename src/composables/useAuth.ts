@@ -2,17 +2,29 @@ import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import type { User } from '../types';
-const apiUrl = import.meta.env.BASE_URL || 'http://localhost:8000';
+const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:8000';
 
 export function useAuth() {
     const user = ref<User | null>(null);
     const isAuthenticated = ref(!!localStorage.getItem('token'));
     const router = useRouter();
 
+
+    const setUserToLocalStorage = (userData: User) => {
+        localStorage.setItem('user', JSON.stringify(userData));
+    };
+
+    const getUserFromLocalStorage = (): User | null => {
+        const userData = localStorage.getItem('user');
+        return userData ? JSON.parse(userData) : null;
+    };
+
     const login = async (email: string, password: string) => {
         try {
             const response = await axios.post(`${apiUrl}/api/login`, { email, password });
             localStorage.setItem('token', response.data.token);
+
+            setUserToLocalStorage(response.data.user);
             user.value = response.data.user;
             isAuthenticated.value = true;
             await router.push('/');
@@ -57,9 +69,14 @@ export function useAuth() {
                 });
                 user.value = response.data;
                 isAuthenticated.value = true;
+
+                setUserToLocalStorage(response.data);
+                return response;
             } catch (error) {
                 localStorage.removeItem('token');
                 isAuthenticated.value = false;
+
+                return null;
             }
         }
     };
