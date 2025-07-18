@@ -9,7 +9,7 @@
             class="post-image" />
         <div class="post-actions">
             <button @click="handleToggleLike" class="like-button">
-                {{post.likes.some(like => like.user_id === user?.id) ? 'Unlike' : 'Like'}} ({{ post.likes.length }})
+                {{ post.likes.some(like => like.user_id === user?.id) ? 'Unlike' : 'Like' }} ({{ post.likes.length }})
             </button>
         </div>
         <div class="comments-section">
@@ -41,14 +41,13 @@ export default defineComponent({
             required: true,
         },
     },
-    setup(props) {
+    emits: ['update-post', 'delete-post'],
+
+    setup(props, { emit }) {
         const { user, fetchUser } = useAuth();
         const { toggleLike, addComment, deleteComment, deletePost } = usePosts();
         const newComment = ref('');
 
-
-
-       
         // Ambil user dari localStorage saat setup
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
@@ -58,24 +57,45 @@ export default defineComponent({
                 console.error('Failed to parse user from storage');
             }
         } else {
-            // Optional: fetch dari server kalau localStorage kosong
             fetchUser();
         }
 
-
-
         const handleToggleLike = async () => {
+            // Simpan state sebelumnya untuk rollback jika gagal
+            const originalPost = { ...props.post };
+            const userId = user.value?.id;
+
+            if (!userId) {
+                console.error('User not authenticated');
+                return;
+            }
+
+            // Optimistic update
+            const isCurrentlyLiked = props.post.likes.some(like => like.user_id === userId);
+            if (isCurrentlyLiked) {
+                // Remove like optimistically
+                props.post.likes = props.post.likes.filter(like => like.user_id !== userId);
+            } else {
+                // Add like optimistically
+                props.post.likes.push({ user_id: userId });
+            }
+            emit('update-post', { ...props.post });
+
             try {
-                await toggleLike(props.post.id);
+                const updatedPost = await toggleLike(props.post.id);
+                emit('update-post', updatedPost); // Emit event dengan data post yang diperbarui dari server
             } catch (error: any) {
-                console.error(error.message);
+                console.error('Like action failed:', error.message);
+                // Rollback ke state sebelumnya jika server gagal
+                emit('update-post', originalPost);
             }
         };
 
         const handleAddComment = async () => {
             try {
-                await addComment(props.post.id, newComment.value);
+                const updatedPost = await addComment(props.post.id, newComment.value);
                 newComment.value = '';
+                emit('update-post', updatedPost);
             } catch (error: any) {
                 console.error(error.message);
             }
@@ -83,7 +103,8 @@ export default defineComponent({
 
         const handleDeleteComment = async (commentId: number) => {
             try {
-                await deleteComment(commentId);
+                const updatedPost = await deleteComment(commentId);
+                emit('update-post', updatedPost);
             } catch (error: any) {
                 console.error(error.message);
             }
@@ -92,6 +113,7 @@ export default defineComponent({
         const handleDeletePost = async () => {
             try {
                 await deletePost(props.post.id);
+                emit('delete-post', props.post.id);
             } catch (error: any) {
                 console.error(error.message);
             }

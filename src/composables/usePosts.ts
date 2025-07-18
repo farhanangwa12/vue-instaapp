@@ -13,8 +13,8 @@ export function usePosts() {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             posts.value = response.data;
-        } catch {
-            throw new Error('Failed to fetch posts');
+        } catch (error: any) {
+            throw new Error(`Failed to fetch posts: ${error.response?.data?.message || error.message}`);
         }
     };
 
@@ -30,10 +30,10 @@ export function usePosts() {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            posts.value.unshift(response.data);
-            await fetchPosts();
-        } catch {
-            throw new Error('Failed to create post');
+            posts.value.unshift(response.data); // Tambahkan post baru ke daftar
+            return response.data; // Kembalikan post baru
+        } catch (error: any) {
+            throw new Error(`Failed to create post: ${error.response?.data?.message || error.message}`);
         }
     };
 
@@ -42,43 +42,59 @@ export function usePosts() {
             await axios.delete(`${apiUrl}/api/posts/${postId}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
-            posts.value = posts.value.filter(post => post.id !== postId);
-            await fetchPosts();
-        } catch {
-            throw new Error('Failed to delete post');
+            posts.value = posts.value.filter(post => post.id !== postId); // Hapus post dari state
+        } catch (error: any) {
+            throw new Error(`Failed to delete post: ${error.response?.data?.message || error.message}`);
         }
     };
 
     const toggleLike = async (postId: number) => {
         try {
-            await axios.post(`${apiUrl}/api/posts/${postId}/like`, {}, {
+            const response = await axios.post(`${apiUrl}/api/posts/${postId}/like`, {}, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
-            await fetchPosts();
-        } catch {
-            throw new Error('Like action failed');
+            const updatedPost = response.data.post; // Asumsikan API mengembalikan post yang diperbarui
+            const index = posts.value.findIndex(post => post.id === postId);
+            if (index !== -1) {
+                posts.value[index] = updatedPost; // Perbarui post di state
+            }
+            return updatedPost; // Kembalikan post yang diperbarui
+        } catch (error: any) {
+            throw new Error(`Failed to toggle like: ${error.response?.data?.message || error.message}`);
         }
     };
 
     const addComment = async (postId: number, content: string) => {
         try {
-            await axios.post(`${apiUrl}/api/posts/${postId}/comment`, { content }, {
+            const response = await axios.post(`${apiUrl}/api/posts/${postId}/comment`, { content }, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
-            await fetchPosts();
-        } catch {
-            throw new Error('Failed to add comment');
+            const updatedPost = response.data; // Asumsikan API mengembalikan post yang diperbarui
+            // const index = posts.value.findIndex(post => post.id === postId);
+            // if (index !== -1) {
+            //     posts.value[index] = updatedPost; // Perbarui post di state
+            // }
+
+            console.log(updatedPost);
+            return updatedPost; // Kembalikan post yang diperbarui
+        } catch (error: any) {
+            throw new Error(`Failed to add comment: ${error.response?.data?.message || error.message}`);
         }
     };
 
     const deleteComment = async (commentId: number) => {
         try {
-            await axios.delete(`${apiUrl}/api/comments/${commentId}`, {
+            const response = await axios.delete(`${apiUrl}/api/comments/${commentId}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
-            await fetchPosts();
-        } catch {
-            throw new Error('Failed to delete comment');
+            const updatedPost = response.data.post; // Asumsikan API mengembalikan post yang diperbarui
+            const index = posts.value.findIndex(post => post.id === updatedPost.id);
+            if (index !== -1) {
+                posts.value[index] = updatedPost; // Perbarui post di state
+            }
+            return updatedPost; // Kembalikan post yang diperbarui
+        } catch (error: any) {
+            throw new Error(`Failed to delete comment: ${error.response?.data?.message || error.message}`);
         }
     };
 
