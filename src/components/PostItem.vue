@@ -1,7 +1,7 @@
 <template>
     <div class="post-card">
         <div class="post-header">
-            <span class="username">{{ post.user.username }}</span>
+            <span class="username">{{ post.user.name }}</span>
             <span class="timestamp">{{ new Date(post.created_at).toLocaleString() }}</span>
         </div>
         <p class="post-content">{{ post.content }}</p>
@@ -47,6 +47,8 @@ export default defineComponent({
         const newComment = ref('');
 
 
+
+       
         // Ambil user dari localStorage saat setup
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
