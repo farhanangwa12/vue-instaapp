@@ -2,11 +2,7 @@
     <div class="post-form-container">
         <form @submit.prevent="handleCreatePost">
             <div class="form-group">
-                <textarea
-                    v-model="content"
-                    placeholder="What's on your mind?"
-                    required
-                ></textarea>
+                <textarea v-model="content" placeholder="What's on your mind?" required></textarea>
             </div>
             <div class="form-group">
                 <input type="file" accept="image/*" @change="onFileChange" />
@@ -22,7 +18,8 @@ import { defineComponent, ref } from 'vue';
 import { usePosts } from '../composables/usePosts';
 
 export default defineComponent({
-    setup() {
+    emits: ['new-data-added'],
+    setup(props, { emit }) {
         const content = ref('');
         const image = ref<File | null>(null);
         const error = ref('');
@@ -41,8 +38,11 @@ export default defineComponent({
                 content.value = '';
                 image.value = null;
                 error.value = '';
+                // Emit event setelah post berhasil
+                emit('new-data-added', true);
             } catch (err: any) {
                 error.value = err.message;
+                emit('new-data-added', false); // Emit false jika gagal
             }
         };
 
@@ -53,10 +53,14 @@ export default defineComponent({
 
 <style scoped>
 .post-form-container {
-    background: white;
-    padding: 24px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    flex-grow: 1;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto 20px;
+    min-width: 500px;
 }
 
 .form-group {
@@ -64,43 +68,64 @@ export default defineComponent({
 }
 
 textarea {
-    width: 100%;
+    width: 95%;
     padding: 12px;
     border: 1px solid #d1d5db;
-    border-radius: 6px;
+    border-radius: 8px;
     resize: vertical;
-    outline: none;
+    font-size: 14px;
+    color: #374151;
+    min-height: 100px;
 }
 
 textarea:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
 input[type="file"] {
-    width: 100%;
-    padding: 8px;
+    width: 95%;
+    padding: 10px;
     border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #374151;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+    background: #e5e7eb;
+    border: none;
+    padding: 8px 16px;
     border-radius: 6px;
+    cursor: pointer;
+    color: #374151;
+}
+
+input[type="file"]::-webkit-file-upload-button:hover {
+    background: #d1d5db;
 }
 
 button {
-    background: #3b82f6;
-    color: white;
-    padding: 10px;
+    background: #2563eb;
+    color: #ffffff;
+    padding: 12px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     width: 100%;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 button:hover {
-    background: #2563eb;
+    background: #1e40af;
 }
 
 .error-message {
     color: #ef4444;
     font-size: 14px;
-    margin-top: 8px;
+    margin-top: 12px;
+    text-align: center;
 }
 </style>

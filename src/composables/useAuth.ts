@@ -14,10 +14,10 @@ export function useAuth() {
         localStorage.setItem('user', JSON.stringify(userData));
     };
 
-    const getUserFromLocalStorage = (): User | null => {
-        const userData = localStorage.getItem('user');
-        return userData ? JSON.parse(userData) : null;
-    };
+    // const getUserFromLocalStorage = (): User | null => {
+    //     const userData = localStorage.getItem('user');
+    //     return userData ? JSON.parse(userData) : null;
+    // };
 
     const login = async (email: string, password: string) => {
         try {

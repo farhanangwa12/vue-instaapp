@@ -1,30 +1,45 @@
 <template>
     <div class="post-card">
         <div class="post-header">
-            <span class="username">{{ post.user.name }}</span>
-            <span class="timestamp">{{ new Date(post.created_at).toLocaleString() }}</span>
+            <div class="user-info">
+                <div class="avatar">
+                    <span>{{ post.user.name[0] }}</span>
+                </div>
+                <div class="user-details">
+                    <span class="username">{{ post.user.name }}</span>
+                    <span class="timestamp">{{ new Date(post.created_at).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }) }}</span>
+                </div>
+            </div>
+            <button v-if="post.user_id === user?.id" @click="handleDeletePost" class="delete-post-button">Delete</button>
         </div>
         <p class="post-content">{{ post.content }}</p>
-        <img v-if="post.image" :src="'http://localhost:8000/storage/' + post.image" alt="Post image"
-            class="post-image" />
+        <img v-if="post.image" :src="'http://localhost:8000/storage/' + post.image" alt="Post image" class="post-image" />
         <div class="post-actions">
             <button @click="handleToggleLike" class="like-button">
-                {{ post.likes.some(like => like.user_id === user?.id) ? 'Unlike' : 'Like' }} ({{ post.likes.length }})
+                <svg :class="{ 'liked': post.likes.some(like => like.user_id === user?.id) }" class="like-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                </svg>
+                <span>{{ post.likes.length }} {{ post.likes.length === 1 ? 'Like' : 'Likes' }}</span>
             </button>
         </div>
         <div class="comments-section">
             <div v-for="comment in post.comments" :key="comment.id" class="comment">
-                <span><strong>{{ comment.user.name }}</strong>: {{ comment.content }}</span>
-                <button v-if="comment.user_id === user?.id" @click="handleDeleteComment(comment.id)"
-                    class="delete-comment-button">Delete</button>
+                <div class="comment-content">
+                    <div class="comment-avatar">
+                        <span>{{ comment.user.name[0] }}</span>
+                    </div>
+                    <div>
+                        <span class="comment-username">{{ comment.user.name }}</span>
+                        <span class="comment-text">{{ comment.content }}</span>
+                    </div>
+                </div>
+                <button v-if="comment.user_id === user?.id" @click="handleDeleteComment(comment.id)" class="delete-comment-button">Delete</button>
             </div>
             <form @submit.prevent="handleAddComment" class="add-comment-form">
                 <input v-model="newComment" placeholder="Add a comment..." required />
-                <button type="submit">Comment</button>
+                <button type="submit">Post</button>
             </form>
         </div>
-        <button v-if="post.user_id === user?.id" @click="handleDeletePost" class="delete-post-button">Delete
-            Post</button>
     </div>
 </template>
 
@@ -48,7 +63,7 @@ export default defineComponent({
         const { toggleLike, addComment, deleteComment, deletePost } = usePosts();
         const newComment = ref('');
 
-        // Ambil user dari localStorage saat setup
+        // Fetch user from localStorage or API
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             try {
@@ -61,7 +76,6 @@ export default defineComponent({
         }
 
         const handleToggleLike = async () => {
-            // Simpan state sebelumnya untuk rollback jika gagal
             const originalPost = { ...props.post };
             const userId = user.value?.id;
 
@@ -73,20 +87,17 @@ export default defineComponent({
             // Optimistic update
             const isCurrentlyLiked = props.post.likes.some(like => like.user_id === userId);
             if (isCurrentlyLiked) {
-                // Remove like optimistically
                 props.post.likes = props.post.likes.filter(like => like.user_id !== userId);
             } else {
-                // Add like optimistically
                 props.post.likes.push({ user_id: userId });
             }
             emit('update-post', { ...props.post });
 
             try {
                 const updatedPost = await toggleLike(props.post.id);
-                emit('update-post', updatedPost); // Emit event dengan data post yang diperbarui dari server
+                emit('update-post', updatedPost);
             } catch (error: any) {
                 console.error('Like action failed:', error.message);
-                // Rollback ke state sebelumnya jika server gagal
                 emit('update-post', originalPost);
             }
         };
@@ -126,72 +137,144 @@ export default defineComponent({
 
 <style scoped>
 .post-card {
-    background: white;
-    padding: 24px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-width: 500px;
+    margin: 0 auto 20px;
 }
 
 .post-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
 }
 
 .username {
-    font-weight: bold;
-    color: #1f2937;
+    font-weight: 600;
+    color: #111827;
 }
 
 .timestamp {
     font-size: 12px;
     color: #6b7280;
-    margin-left: 8px;
 }
 
 .post-content {
-    margin-bottom: 12px;
     color: #374151;
+    margin-bottom: 16px;
+    line-height: 1.5;
 }
 
 .post-image {
     width: 100%;
-    border-radius: 6px;
-    margin-bottom: 12px;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-bottom: 16px;
 }
 
 .post-actions {
     display: flex;
     align-items: center;
-    margin-bottom: 12px;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 .like-button {
-    color: #3b82f6;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     background: none;
     border: none;
+    color: #4b5563;
     cursor: pointer;
+    font-size: 14px;
 }
 
 .like-button:hover {
-    color: #1d4ed8;
+    color: #2563eb;
+}
+
+.like-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.like-icon.liked {
+    fill: #2563eb;
+    color: #2563eb;
 }
 
 .comments-section {
     border-top: 1px solid #e5e7eb;
-    padding-top: 12px;
+    padding-top: 16px;
 }
 
 .comment {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 8px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.comment-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.comment-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #4b5563;
+}
+
+.comment-username {
+    font-weight: 600;
+    color: #111827;
+    margin-right: 4px;
+}
+
+.comment-text {
+    color: #374151;
 }
 
 .delete-comment-button {
-    color: #ef4444;
     background: none;
     border: none;
+    color: #ef4444;
+    font-size: 12px;
     cursor: pointer;
 }
 
@@ -200,41 +283,43 @@ export default defineComponent({
 }
 
 .add-comment-form {
-    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
 }
 
 .add-comment-form input {
-    width: 100%;
-    padding: 8px;
+    flex: 1;
+    padding: 10px;
     border: 1px solid #d1d5db;
-    border-radius: 6px;
+    border-radius: 8px;
+    font-size: 14px;
 }
 
 .add-comment-form input:focus {
-    border-color: #3b82f6;
     outline: none;
+    border-color: #2563eb;
 }
 
 .add-comment-form button {
-    margin-top: 8px;
-    background: #3b82f6;
-    color: white;
-    padding: 8px;
-    width: 100%;
+    background: #2563eb;
+    color: #ffffff;
+    padding: 10px 16px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
+    font-size: 14px;
 }
 
 .add-comment-form button:hover {
-    background: #2563eb;
+    background: #1e40af;
 }
 
 .delete-post-button {
-    margin-top: 12px;
-    color: #ef4444;
     background: none;
     border: none;
+    color: #ef4444;
+    font-size: 14px;
     cursor: pointer;
 }
 

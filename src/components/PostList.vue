@@ -7,14 +7,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, ref, onMounted, watch } from 'vue';
 import { usePosts } from '../composables/usePosts';
 import PostItem from './PostItem.vue';
 import type { Post } from '../types';
 
 export default defineComponent({
+    props: {
+        newDataAdded: {
+            type: Boolean,
+            required: true,
+        },
+    },
     components: { PostItem },
-    setup() {
+    emits: ['reset-new-data'], // Declare the new event
+    setup(props, { emit }) {
         const { posts, fetchPosts } = usePosts();
         const error = ref('');
 
@@ -27,10 +34,21 @@ export default defineComponent({
         });
 
         const updatePost = async (updatedPost: any) => {
-          
+
             await fetchPosts();
-           
+
         };
+
+
+        // Watch perubahan pada prop newDataAdded
+        watch(() => props.newDataAdded, (newValue) => {
+            if (newValue) {
+                alert('Berjalan!!!!!');
+                fetchPosts(); // Fetch ulang jika newDataAdded true
+                emit('reset-new-data'); // Emit event to reset newDataAdded
+
+            }
+        });
 
         const removePost = (postId: number) => {
 
